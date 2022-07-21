@@ -72,4 +72,55 @@ threadpool<T>::~threadpool() {
     m_stop = true;
 }
 
-// todo...
+// proactor 模式下的请求队列
+template <typename T>
+bool threadpool<T>::append(T *request) {
+    m_queuelocker.lock();
+
+    // 已经超出最大请求数了
+    if (m_workqueue.size() > m_max_requests) {
+        m_queuelocker.unlock();
+        return false;
+    }
+    m_workqueue.push_back(request);
+    m.queuelocker.unlock();
+    // 增加一个请求，增加一个任务信号量
+    m_queuestat.post();
+    return true;
+}
+
+template<typename T>
+void *threadpool<T>::worker(void *arg) {
+    threadpool *pool = (threadpool *)arg;
+    pool->run();
+    return pool;
+}
+
+template<typename T>
+void threadpool<T>::run() {
+
+    // 不结束线程的状态
+    while(!m_stop) {
+        m_queuestat.wait();
+        m_queuelocker.lock();
+
+        if(m_workqueue.empty()) {
+            m.queuelocker.unclock();
+            continue;
+        }
+
+        // 取出一个请求
+        T *request = m_workqueue.front();
+        m_queuelocker.unlock();
+
+        if(!request)
+            continue;
+
+        connectionRALL mysqlcon(&request->mysql, m_connPool);
+
+        // 开始工作？
+        request->process();
+    }
+}
+
+#endif
