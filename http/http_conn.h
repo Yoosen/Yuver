@@ -124,7 +124,7 @@ private:
     bool add_blank_line();
 
 public:
-    static int m_epollfd;
+    static int m_epollfd;   // 所有连接共用这一个 epollfd
     static int m_user_count;
     MYSQL *mysql;
 
@@ -155,13 +155,13 @@ private:
     char *m_version;
     char *m_host;
     int m_content_length;
-    bool m_linger;
+    bool m_linger;          // post keep-alive
     char *m_file_address;   //读取服务器上的文件地址
     struct stat m_file_stat;
     struct iovec m_iv[2];   //io向量机制iovec
     int m_iv_count;
     int cgi;        //是否启用的POST
-    char *m_string; //存储请求头数据
+    char *m_string; //存储请求头数据    user=123&passwd=123
     int bytes_to_send;
     int bytes_have_send;
 };

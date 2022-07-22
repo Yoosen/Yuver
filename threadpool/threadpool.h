@@ -47,6 +47,7 @@ threadpool<T>::threadpool(connection_pool *connPool, int thread_number, int max_
     if(!m_threads)
         throw std::exception();
 
+    // 默认创建 8 个线程
     for(int i = 0; i < thread_number; ++i) {
         //创建成功应该返回0，如果线程池在线程创建阶段就失败，那就应该关闭线程池了
         // 传递一个 pthread_t 类型的指针变量
