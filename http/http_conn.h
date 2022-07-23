@@ -125,7 +125,7 @@ private:
 
 public:
     static int m_epollfd;   // 所有连接共用这一个 epollfd
-    static int m_user_count;
+    static int m_user_count;    // 全局和访问用户数
     MYSQL *mysql;
 
 private:

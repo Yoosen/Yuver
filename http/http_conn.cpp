@@ -696,5 +696,5 @@ void http_conn::process() {
     if(!write_ret) {
         close_conn();
     }
-    modfd(m_epollfd, m_sockfd, EPOLOUT);
+    modfd(m_epollfd, m_sockfd, EPOLLOUT);
 }

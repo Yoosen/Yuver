@@ -12,4 +12,6 @@ The purpose of Yuver is to help developers understand how to write a high perfor
 * epoll
 * non-blocking I/O
 * thread-pool
-* ...
+* proactor
+* connection-pool
+* task queue
