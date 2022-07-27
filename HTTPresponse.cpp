@@ -37,9 +37,9 @@ const std::unordered_map<int, std::string> HTTPresponse::CODE_PATH = {
 
 HTTPresponse::HTTPresponse() {
     code_ = -1;
-    path_ = srcDir_ = "";
+    path_ = srcDir_ = "";   // path_代表解析得到的路径，srcDir_表示根目录，除此之外，我们还需要一个哈希表提供4XX状态码到响应文件路径的映射
     isKeepAlive_ = false;
-    mmFile_ = nullptr; 
+    mmFile_ = nullptr;
     mmFileStat_ = { 0 };
 };
 
@@ -47,27 +47,28 @@ HTTPresponse::~HTTPresponse() {
     unmapFile_();
 }
 
-void HTTPresponse::init(const std::string& srcDir, std::string& path, bool isKeepAlive, int code){
+void HTTPresponse::init(const std::string& srcDir, std::string& path, bool isKeepAlive, int code) {
     assert(srcDir != "");
-    if(mmFile_) { unmapFile_(); }
+    if (mmFile_) { unmapFile_(); }
     code_ = code;
     isKeepAlive_ = isKeepAlive;
     path_ = path;
     srcDir_ = srcDir;
-    mmFile_ = nullptr; 
+    mmFile_ = nullptr;
     mmFileStat_ = { 0 };
 }
 
+// 生成响应报文的主函数
 void HTTPresponse::makeResponse(Buffer& buff) {
     /* 判断请求的资源文件 */
-    if(stat((srcDir_ + path_).data(), &mmFileStat_) < 0 || S_ISDIR(mmFileStat_.st_mode)) {
+    if (stat((srcDir_ + path_).data(), &mmFileStat_) < 0 || S_ISDIR(mmFileStat_.st_mode)) {
         code_ = 404;
     }
-    else if(!(mmFileStat_.st_mode & S_IROTH)) {
+    else if (!(mmFileStat_.st_mode & S_IROTH)) {
         code_ = 403;
     }
-    else if(code_ == -1) { 
-        code_ = 200; 
+    else if (code_ == -1) {
+        code_ = 200;
     }
     errorHTML_();
     addStateLine_(buff);
@@ -84,15 +85,17 @@ size_t HTTPresponse::fileLen() const {
 }
 
 void HTTPresponse::errorHTML_() {
-    if(CODE_PATH.count(code_) == 1) {
-        path_ = CODE_PATH.find(code_)->second;
+    // 存在 40x 错误
+    if (CODE_PATH.count(code_) == 1) {
+        path_ = CODE_PATH.find(code_)->second;      // 找到对应的错误页面
+        // 获取 filename 的文件信息，保存在结构体 mmFileStat_ 中
         stat((srcDir_ + path_).data(), &mmFileStat_);
     }
 }
 
 void HTTPresponse::addStateLine_(Buffer& buff) {
     std::string status;
-    if(CODE_STATUS.count(code_) == 1) {
+    if (CODE_STATUS.count(code_) == 1) {    // 200 400 403 404
         status = CODE_STATUS.find(code_)->second;
     }
     else {
@@ -104,10 +107,11 @@ void HTTPresponse::addStateLine_(Buffer& buff) {
 
 void HTTPresponse::addResponseHeader_(Buffer& buff) {
     buff.append("Connection: ");
-    if(isKeepAlive_) {
+    if (isKeepAlive_) {
         buff.append("keep-alive\r\n");
         buff.append("keep-alive: max=6, timeout=120\r\n");
-    } else{
+    }
+    else {
         buff.append("close\r\n");
     }
     buff.append("Content-type: " + getFileType_() + "\r\n");
@@ -115,17 +119,17 @@ void HTTPresponse::addResponseHeader_(Buffer& buff) {
 
 void HTTPresponse::addResponseContent_(Buffer& buff) {
     int srcFd = open((srcDir_ + path_).data(), O_RDONLY);
-    if(srcFd < 0) { 
+    if (srcFd < 0) {
         errorContent(buff, "File NotFound!");
-        return; 
+        return;
     }
 
     // 将文件映射到内存提高文件的访问速度 
     // MAP_PRIVATE 建立一个写入时拷贝的私有映射
     int* mmRet = (int*)mmap(0, mmFileStat_.st_size, PROT_READ, MAP_PRIVATE, srcFd, 0);
-    if(*mmRet == -1) {
+    if (*mmRet == -1) {
         errorContent(buff, "File NotFound!");
-        return; 
+        return;
     }
     mmFile_ = (char*)mmRet;
     close(srcFd);
@@ -133,8 +137,8 @@ void HTTPresponse::addResponseContent_(Buffer& buff) {
 }
 
 void HTTPresponse::unmapFile_() {
-    if(mmFile_) {
-        munmap(mmFile_, mmFileStat_.st_size);
+    if (mmFile_) {
+        munmap(mmFile_, mmFileStat_.st_size);   // 解除内存映射
         mmFile_ = nullptr;
     }
 }
@@ -142,28 +146,29 @@ void HTTPresponse::unmapFile_() {
 std::string HTTPresponse::getFileType_() {
     /* 判断文件类型 */
     std::string::size_type idx = path_.find_last_of('.');
-    if(idx == std::string::npos) {
+    if (idx == std::string::npos) {
         return "text/plain";
     }
     std::string suffix = path_.substr(idx);
-    if(SUFFIX_TYPE.count(suffix) == 1) {
+    if (SUFFIX_TYPE.count(suffix) == 1) {
         return SUFFIX_TYPE.find(suffix)->second;
     }
     return "text/plain";
 }
 
-void HTTPresponse::errorContent(Buffer& buff, std::string message) 
+void HTTPresponse::errorContent(Buffer& buff, std::string message)
 {
     std::string body;
     std::string status;
     body += "<html><title>Error</title>";
     body += "<body bgcolor=\"ffffff\">";
-    if(CODE_STATUS.count(code_) == 1) {
+    if (CODE_STATUS.count(code_) == 1) {
         status = CODE_STATUS.find(code_)->second;
-    } else {
+    }
+    else {
         status = "Bad Request";
     }
-    body += std::to_string(code_) + " : " + status  + "\n";
+    body += std::to_string(code_) + " : " + status + "\n";
     body += "<p>" + message + "</p>";
     body += "<hr><em>TinyWebServer</em></body></html>";
 

@@ -1,8 +1,3 @@
-// encode UTF-8
-
-// @Author        : Aged_cat
-// @Date          : 2021-05-04
-
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
@@ -33,6 +28,7 @@ private:
     
     void initEventMode_(int trigMode);
 
+    // 处理 http 连接
     void addClientConnection(int fd, sockaddr_in addr); //添加一个HTTP连接
     void closeConn_(HTTPconnection* client);            //关闭一个HTTP连接
 
@@ -53,9 +49,9 @@ private:
 
     int port_;
     int timeoutMS_;  /* 毫秒MS,定时器的默认过期时间 */
-    bool isClose_;
+    bool isClose_;     // 是否关闭
     int listenFd_;
-    bool openLinger_;
+    bool openLinger_;   // 
     char* srcDir_;//需要获取的路径
     
     uint32_t listenEvent_;
