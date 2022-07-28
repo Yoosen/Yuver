@@ -17,22 +17,22 @@
 
 class WebServer {
 public:
-    WebServer(int port,int trigMode,int timeoutMS,bool optLinger,int threadNum);
+    WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int threadNum);
     ~WebServer();
 
     void Start(); //一切的开始
 
 private:
-    //对服务端的socket进行设置，最后可以得到listenFd
-    bool initSocket_(); 
-    
+    //对服务端的 socket 进行设置，最后可以得到 listenFd
+    bool initSocket_();
+
     void initEventMode_(int trigMode);
 
     // 处理 http 连接
     void addClientConnection(int fd, sockaddr_in addr); //添加一个HTTP连接
     void closeConn_(HTTPconnection* client);            //关闭一个HTTP连接
 
-  
+
     void handleListen_();
     void handleWrite_(HTTPconnection* client);
     void handleRead_(HTTPconnection* client);
@@ -53,10 +53,10 @@ private:
     int listenFd_;
     bool openLinger_;   // 
     char* srcDir_;//需要获取的路径
-    
+
     uint32_t listenEvent_;
     uint32_t connectionEvent_;
-   
+
     std::unique_ptr<TimerManager>timer_;
     std::unique_ptr<ThreadPool> threadpool_;
     std::unique_ptr<Epoller> epoller_;

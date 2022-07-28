@@ -25,17 +25,19 @@ WebServer::~WebServer()
 }
 
 void WebServer::initEventMode_(int trigMode) {      // 初始时 mode = 3
-    listenEvent_ = EPOLLRDHUP;      // 表示读关闭
+    listenEvent_ = EPOLLRDHUP;      // 表示读关闭 宏定义 EPOLLRDHUP 0x2000 二进制 0010000000000000
+    // EPOLLONESHOT 只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
     connectionEvent_ = EPOLLONESHOT | EPOLLRDHUP;   // 只能有一个线程或进程处理同一个描述符 | 读关闭
     switch (trigMode)
     {
         case 0:
             break;
         case 1:
-            connectionEvent_ |= EPOLLET;
+            // 异或操作
+            connectionEvent_ |= EPOLLET;    // 宏定义 ET 1 << 31   10000000 00000000 00000000 00000000
             break;
         case 2:
-            listenEvent_ |= EPOLLET;
+            listenEvent_ |= EPOLLET;    // 结果为 16进制 80002000
             break;
         case 3:
             listenEvent_ |= EPOLLET;        // ET 读

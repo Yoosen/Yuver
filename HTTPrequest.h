@@ -64,9 +64,6 @@ private:
     std::unordered_map<std::string, std::string>post_;
 
     static const std::unordered_set<std::string>DEFAULT_HTML;
-
-
-
 };
 
 #endif  //HTTP_REQUEST_H

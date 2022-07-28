@@ -66,9 +66,9 @@ public:
             );
         // packaged_task将普通的可调用函数对象转换为异步执行的任务
         // std::forward 原封不动的传给下一个函数
-        auto taskPtr = make_shared<packaged_task<f>>()
+        // auto taskPtr = make_shared<packaged_task<f>>()  (bind(forward(f), forward(args)))     // make_shared 共享指针
         {
-            std::unique_lock<std::mutex>lk(m_mutex);
+            std::unique_lock<std::mutex> lk(m_mutex);
             if (m_stop) throw std::runtime_error("submit on stopped ThreadPool");
             tasks.emplace([taskPtr]() { (*taskPtr)(); });
         }
