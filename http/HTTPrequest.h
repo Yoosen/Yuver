@@ -6,7 +6,7 @@
 #include <string>
 #include <regex>
 
-#include "buffer.h"
+#include "../buffer/buffer.h"
 
 class HTTPrequest
 {

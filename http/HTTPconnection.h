@@ -7,7 +7,7 @@
 #include<sys/types.h>
 #include<assert.h>
 
-#include "buffer.h"
+#include "../buffer/buffer.h"
 #include "HTTPrequest.h"
 #include "HTTPresponse.h"
 

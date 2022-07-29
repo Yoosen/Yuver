@@ -78,4 +78,18 @@ void SqlConnPool::FreeConn(MYSQL* mysql) {
     sem_post(&semId_);
 }
 
-// todo
+// 关闭连接池
+void SqlConnPool::ClosePool() {
+    lock_guard<mutex> locker(mtx_);
+    // 关闭所有连接
+    while(!connQue_.empty()) {
+        auto item = connQue_.front();
+        connQue_.pop();
+        mysql_close(item);
+    }
+    mysql_library_end();
+}
+
+SqlConnPool::~SqlConnPool() {
+    ClosePool();
+}

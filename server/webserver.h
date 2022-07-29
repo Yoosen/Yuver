@@ -10,14 +10,23 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "epoller.h"
-#include "timer.h"
-#include "threadpool.h"
-#include "HTTPconnection.h"
+#include "../server/epoller.h"
+#include "../timer/timer.h"
+#include "../pool/threadpool.h"
+#include "../http/HTTPconnection.h"
+#include "../pool/sqlconnpool.h"
+#include "../pool/sqlconnRAII.h"
 
 class WebServer {
 public:
     WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int threadNum);
+
+    // Yoosen 支持数据库的构造函数
+    WebServer(int port, int trigMode, int timeoutMS, bool optLinger,
+        int threadNum, int sqlPort, const char* sqlUser,
+        const char* sqlPasswd, const char* dbName, int connPoolNum);
+
+
     ~WebServer();
 
     void Start(); //一切的开始
@@ -59,7 +68,7 @@ private:
 
     std::unique_ptr<TimerManager>timer_;
     std::unique_ptr<ThreadPool> threadpool_;
-    std::unique_ptr<Epoller> epoller_;
+    std::unique_ptr<Epoller> epoller_;      // 独占指针 epoller
     std::unordered_map<int, HTTPconnection> users_;
 };
 
