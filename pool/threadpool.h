@@ -59,6 +59,7 @@ public:
     }
 
     // std::future C++ 11   future对象提供访问异步操作结果的机制，很轻松解决从异步任务中返回结果
+    // 会在将来某个时间获得异步的结果
     template<typename F, typename... Args>
     auto submit(F&& f, Args&&... args)->std::future<decltype(f(args...))> {
         auto taskPtr = std::make_shared<std::packaged_task<decltype(f(args...))()>>(      // decltype 自动推导函数返回值类型

@@ -1,7 +1,3 @@
-/*** 
- * @Author  : Yoosen
- * @Date    : 2022-07-26
- */
 #include "webserver.h"
 
 WebServer::WebServer(
@@ -150,6 +146,12 @@ void WebServer::closeConn_(HTTPconnection* client)
     client->closeHTTPConn();
 }
 
+/*** 
+ * @Description: 
+ * @param {int} fd
+ * @param {sockaddr_in} addr
+ * @return {*}
+ */
 void WebServer::addClientConnection(int fd, sockaddr_in addr)
 {
     assert(fd > 0);
@@ -164,7 +166,7 @@ void WebServer::addClientConnection(int fd, sockaddr_in addr)
 
 
 /*** 
- * @Description: 
+ * @Description: 处理新连接的 http
  * @return {*}
  */
 void WebServer::handleListen_() {
